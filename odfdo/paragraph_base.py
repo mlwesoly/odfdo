@@ -33,7 +33,7 @@ from .element import Element, PropDef, Text, register_element_class, to_str
 
 _rsplitter = re.compile("(\n|\t|  +)")
 _rspace = re.compile("^  +$")
-
+_rspace2 = re.compile("^ +$")
 
 def _get_formatted_text(  # noqa: C901
     element: Element,
@@ -272,6 +272,11 @@ class ParagraphBase(Element):
                 continue
             if b == "\t":
                 self.append(Tab())
+                continue
+            if _rspace2.match(b):
+                # follow ODF standard : n spaces => one space + spacer(n-1)
+                self.append(" ")
+                self.append(Spacer(len(b)))
                 continue
             if _rspace.match(b):
                 # follow ODF standard : n spaces => one space + spacer(n-1)
