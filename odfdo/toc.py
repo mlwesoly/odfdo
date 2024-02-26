@@ -265,6 +265,9 @@ class TOC(Element):
             toc_source.append(template)
         return toc_source
 
+    def __str__(self) -> str:
+        return self.get_formatted_text()
+
     def get_formatted_text(self, context: dict | None = None) -> str:
         index_body = self.get_element("text:index-body")
 
@@ -272,19 +275,17 @@ class TOC(Element):
             return ""
         if context is None:
             context = {}
-        if context["rst_mode"]:
+        if context.get("rst_mode"):
             return "\n.. contents::\n\n"
 
         result = []
         for element in index_body.children:
             if element.tag == "text:index-title":
-                for e in element.children:
-                    result.append(e.get_formatted_text(context))
-                result.append("\n")
+                for child_element in element.children:
+                    result.append(child_element.get_formatted_text(context).strip())
             else:
-                result.append(element.get_formatted_text(context))
-        result.append("\n")
-        return "".join(result)
+                result.append(element.get_formatted_text(context).strip())
+        return "\n".join(result)
 
     @property
     def outline_level(self) -> int | None:
@@ -315,13 +316,13 @@ class TOC(Element):
         self.append(body)
         return body
 
-    def get_title(self) -> str | None:
+    def get_title(self) -> str:
         index_body = self.body
         if index_body is None:
-            return None
+            return ""
         index_title = index_body.get_element(IndexTitle._tag)
         if index_title is None:
-            return None
+            return ""
         return index_title.text_content
 
     def set_toc_title(
@@ -387,7 +388,8 @@ class TOC(Element):
         index_body = self.body
 
         # Restore the title
-        index_body.insert(title, position=0)  # type: ignore
+        if title and str(title):
+            index_body.insert(title, position=0)  # type: ignore
 
         # Insert default TOC style
         if use_default_styles:
@@ -425,8 +427,8 @@ class TOC(Element):
                     del level_indexes[idx]
             number_str = ".".join(number) + "."
             # Make the title with "1.2.3. Title" format
-            title = f"{number_str} {header.text}"
-            paragraph = Paragraph(title)
+            header_title = f"{number_str} {str(header)}"
+            paragraph = Paragraph(header_title)
             if use_default_styles:
                 paragraph.style = TOC_ENTRY_STYLE_PATTERN % level
             index_body.append(paragraph)  # type: ignore
