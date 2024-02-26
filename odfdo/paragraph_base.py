@@ -264,7 +264,7 @@ class ParagraphBase(Element):
         """
         text = to_str(text)
         blocs = _rsplitter.split(text)
-        print(f"{blocs}")
+        #print(f"{blocs}")
         for b in blocs:
             if not b:
                 continue
