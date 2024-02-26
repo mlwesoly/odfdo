@@ -31,7 +31,7 @@ from typing import Any
 
 from .element import Element, PropDef, Text, register_element_class, to_str
 
-_rsplitter = re.compile("(\n|\t|  +)")
+_rsplitter = re.compile("(\n|\t|^ |  +)") #^ +|
 _rspace = re.compile("^  +$")
 _rspace2 = re.compile("^ +$")
 
@@ -264,6 +264,7 @@ class ParagraphBase(Element):
         """
         text = to_str(text)
         blocs = _rsplitter.split(text)
+        print(f"{blocs}")
         for b in blocs:
             if not b:
                 continue
@@ -275,7 +276,7 @@ class ParagraphBase(Element):
                 continue
             if _rspace2.match(b):
                 # follow ODF standard : n spaces => one space + spacer(n-1)
-                self.append(" ")
+                #self.append(" ")
                 self.append(Spacer(len(b)))
                 continue
             if _rspace.match(b):
